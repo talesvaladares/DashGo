@@ -6,10 +6,11 @@ import {
     VStack,
     SimpleGrid,
     HStack,
-    Button
+    Button,
    
 } from "@chakra-ui/react";
-import Link from "next/link";
+import NextLink from "next/link";
+import router from 'next/router';
 
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
@@ -18,6 +19,10 @@ import { useForm , SubmitHandler } from 'react-hook-form';
 import { Input } from "../../components/Form/Input";
 import Header from '../../components/Header';
 import Sidebar from "../../components/Sidebar";
+
+import {useMutation} from 'react-query';
+import { api } from "../../services/api";
+import { queryClient } from "../../services/react-query/queryClient";
 
 type CreateUserFormData = {
    name: string;
@@ -40,14 +45,30 @@ export default function CreateUser() {
         resolver : yupResolver(createUserFormdata)
     });
 
+    const createUser = useMutation(async (user: CreateUserFormData ) => {
+        const response = await api.post('/users',{
+            user : {
+                ...user,
+                created_at: new Date()
+            }
+        });
+
+        return response.data.user;
+
+        //apos dar sucesso na criação de um novo usuario
+        //invalidamos todas as queries ja feitas
+        //para assim termos a lista novamente atualiazada
+    },{onSuccess : () => {queryClient.invalidateQueries('users')}});
+
     const handleCreateUser: SubmitHandler<CreateUserFormData> = async (data, event) => {
 
         event.preventDefault();
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await createUser.mutateAsync(data);
+
+        router.push('/users');
 
     }
-        
     return (
         <Box>
             <Header/>
@@ -108,9 +129,9 @@ export default function CreateUser() {
 
                 <Flex mt="8" justifyContent="flex-end">
                         <HStack spacing="4">
-                            <Link href="/users">
+                            <NextLink href="/users">
                                 <Button as="a" colorScheme="whiteAlpha">Cancelar</Button>
-                            </Link>
+                            </NextLink>
                         
                             <Button
                               colorScheme="pink"

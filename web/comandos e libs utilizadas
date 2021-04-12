@@ -5,3 +5,8 @@ yarn add react-icons
 yarn add apexcharts react-apexcharts
 yarn add react-hook-form
 yarn add yup @hookform/resolvers
+yarn add miragejs -D
+yarn add faker -D
+yarn add @types/faker -D
+yarn add react-query
+yarn add axios
